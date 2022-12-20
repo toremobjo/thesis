@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 import SpatialLogGP
-from AUV import AUV
+from AUVNM import AUV
 from simulator_cf import getValue
 
 # GP parameters
@@ -26,7 +26,7 @@ sigma_squared  = 1.7
 nugget = 0.5
 
 # One iteration = one second, running here for 2 hours
-run_iterations = 3600*2
+run_iterations = 3600*3
 
 
 # Initiate 4 AUVs:; Harald, Fritdjof, Roald, and Thor
@@ -91,6 +91,7 @@ for i,ag in enumerate(auvs):
     df = pd.concat([df,tdf])
 
 fig = px.line_3d(df, x="x", y="y", z="z", color='auv')
+fig.show()
 fig.write_image("fig/multivehicleExample/auv_paths.png")
 
 g = []

@@ -44,7 +44,7 @@ nugget = 0.01
 sill = np.var(val)
 
 ######## GLOBAL PATH #########
-def global_evaluate(pf,cov,ax,ay,gridsize,grid_extent,k_mu=1.0, k_cov=1.0, k_range = 0.01):
+def global_evaluate(pf,cov,ax,ay,gridsize,grid_extent,k_mu=1.0, k_cov=1.0, k_range = 0.1):
     xx = np.linspace(0,1000, num=gridsize)
     yy = np.linspace(0,1000, num=gridsize)
 

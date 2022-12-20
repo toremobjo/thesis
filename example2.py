@@ -107,7 +107,7 @@ for t in range(mission_time):
         vals, gno = segment(auv.measurements,auv.xmeasurements,auv.ymeasurements,gridsize,grid_extent)
         pf,cov = model.evaluate(vals,gno)
 
-        eval = myopic_evaluate(pf,cov,auv.x,auv.y,gridsize,grid_extent,k_mu=1.0)
+        eval = myopic_evaluate(pf,cov,auv.x,auv.y,gridsize,grid_extent,k_mu=1.0,k_cov= 0.0)
         auv.wp = eval[0:2]
         auv.measurements  = []
         auv.xmeasurements = []
