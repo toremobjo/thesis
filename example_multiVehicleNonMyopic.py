@@ -22,10 +22,10 @@ time_scale = 5000
 orientation_g = -45.0*np.pi/180.0
 ndim = len(grid_e)
 # Scale and nugget variance for log(x), change the model in AUV.py for another model.
-sigma_squared  = 1.7
-nugget = 0.5
+sigma_squared  = 2.3
+nugget = 0.7
 
-# One iteration = one second, running here for 2 hours
+# One iteration = one second, running here for 3 hours
 run_iterations = 3600*3
 
 
@@ -92,7 +92,7 @@ for i,ag in enumerate(auvs):
 
 fig = px.line_3d(df, x="x", y="y", z="z", color='auv')
 fig.show()
-fig.write_image("fig/multivehicleExample/auv_paths.png")
+fig.write_image("fig/NMmultivehicleExample/auv_paths.png")
 
 g = []
 for i in range(0, ndim):
@@ -120,7 +120,7 @@ fig = go.Figure(data=[go.Volume(
         caps=dict(x_show=False, y_show=False, z_show=False),
     )])
 fig.show()
-fig.write_image("fig/multivehicleExample/predictions.png")
+fig.write_image("fig/NMmultivehicleExample/predictions.png")
 
 
 #plot uncertainty
@@ -137,7 +137,7 @@ fig = go.Figure(data=[go.Volume(
         caps=dict(x_show=False, y_show=False, z_show=False),
     )])
 fig.show()
-fig.write_image("fig/multivehicleExample/variance.png")
+fig.write_image("fig/NMmultivehicleExample/variance.png")
 
 
 ss = np.array(auvs[0].scorel)
@@ -146,7 +146,7 @@ plt.plot(ss.T[4],ss.T[1],label = "predictive mean")
 plt.plot(ss.T[4],ss.T[2],label = "unc")
 plt.plot(ss.T[4],ss.T[3],label = "avoidance")
 plt.legend()
-plt.savefig("fig/multivehicleExample/pathscores_auv1.png",dpi = 300)
+plt.savefig("fig/NMmultivehicleExample/pathscores_auv1.png",dpi = 300)
 plt.close()
 
 
@@ -167,5 +167,5 @@ for ii in range(nv):
     with open('log2.npy', 'wb') as f:
         np.save(f, ss)
 grid = np.array(grid)
-plt.savefig("fig/multivehicleExample/rmse.png",dpi = 300)
+plt.savefig("fig/NMmultivehicleExample/rmse.png",dpi = 300)
 plt.close()

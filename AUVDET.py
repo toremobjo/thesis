@@ -48,8 +48,12 @@ class AUV:
         self.divelength = 2 * self.grid_extent[2] / np.tan(self.maxpitch) + 50.0
         self.dives = np.floor(self.grid_extent[0] / self.divelength)
 
+        bl_x = self.divelength / 2.0
+        bl_y = (2 * self.vehicle_no + 1) * self.grid_extent[1] / (2.0 * self.no_vehicles)
         self.prior_wps = []
-
+        # for i in range(0, int(self.dives * 2) + 1):
+        #    self.prior_wps.append([bl_x*i,bl_y, (i % 2) * self.grid_extent[2] + 0.01])
+        ###################
         self.dives = 1000
         n_rows = 5
         padding = 0.05 * self.grid_extent[0]
@@ -72,7 +76,7 @@ class AUV:
                 for j in range(2 * int(dives) + 1):
                     self.prior_wps.append([wp_x[i] + lx * j, wp_y[i] + ly * j, (j % 2) * self.grid_extent[2] + 0.01])
 
-        self.prior_wps = self.prior_wps[0:18]
+        wwp = copy.deepcopy(self.prior_wps)
 
         self.init = False
         self.adapting = False
@@ -109,7 +113,7 @@ class AUV:
 
     def update(self):
         self.update_iteration += 1
-        ddz = 2.0 * self.grid_extent[2] / self.grid_size[2]
+        ddz = self.grid_extent[2] / self.grid_size[2]
         if self.state:
             self.x = self.x + (self.wp[0] - self.x) * self.speed / np.linalg.norm(
                 np.array([self.x - self.wp[0], self.y - self.wp[1]])) * self.update_period
@@ -186,84 +190,59 @@ class AUV:
         self.df.sort_values(by="c", inplace=True)
 
     def generatePaths(self):
-        r = 1.0 * np.sqrt(2) * self.grid_extent[0] / self.grid_size[0]
+        r = 2.0 * np.sqrt(2) * self.grid_extent[0] / self.grid_size[0]
         ddz = 2.0 * self.grid_extent[2] / self.grid_size[2]
         dz = [-ddz, 0.0, ddz]
         theta = np.linspace(0.0, 2.0 * np.pi * (1.0 - (1.0 / 8)), 8)
         paths = []
         for t in theta:
             for zz in dz:
-                base_node = np.array([r * np.cos(t), r * np.sin(t), zz])
-                paths.append(np.array([base_node, base_node + np.array(
-                    [r * np.cos(t - np.pi / 4.0), r * np.sin(t - np.pi / 4.0), zz - ddz])]))
-                paths.append(np.array(
-                    [base_node, base_node + np.array([r * np.cos(t - np.pi / 4.0), r * np.sin(t - np.pi / 4.0), zz])]))
-                paths.append(np.array([base_node, base_node + np.array(
-                    [r * np.cos(t - np.pi / 4.0), r * np.sin(t - np.pi / 4.0), zz + ddz])]))
-                paths.append(np.array([base_node, base_node + np.array([r * np.cos(t), r * np.sin(t), zz - ddz])]))
-                paths.append(np.array([base_node, base_node + np.array([r * np.cos(t), r * np.sin(t), zz])]))
-                paths.append(np.array([base_node, base_node + np.array([r * np.cos(t), r * np.sin(t), zz + ddz])]))
-                paths.append(np.array([base_node, base_node + np.array(
-                    [r * np.cos(t + np.pi / 4.0), r * np.sin(t + np.pi / 4.0), zz - ddz])]))
-                paths.append(np.array(
-                    [base_node, base_node + np.array([r * np.cos(t + np.pi / 4.0), r * np.sin(t + np.pi / 4.0), zz])]))
-                paths.append(np.array([base_node, base_node + np.array(
-                    [r * np.cos(t + np.pi / 4.0), r * np.sin(t + np.pi / 4.0), zz + ddz])]))
+                paths.append(np.array([r * np.cos(t), r * np.sin(t), zz]))
 
         self.paths = np.array(paths)
 
     def adapt(self):
         pf, pc = self.gp.evaluate(self.df)
-
         scores = []
         wps = []
         lmp = []
         lavoid = []
         lunc = []
         pp = copy.deepcopy(self.paths)
-
         for path in pp:
-            for i in range(2):
-                path[i][0] += self.wp[0]
-                path[i][1] += self.wp[1]
-                path[i][2] += self.wp[2]
+            path[0] += self.wp[0]
+            path[1] += self.wp[1]
+            path[2] += self.wp[2]
 
-            if path[0][2] >= self.grid_extent[2]:
-                path[0][2] = self.grid_extent[2] - 0.01
+            if path[2] >= self.grid_extent[2]:
+                path[2] = self.grid_extent[2] - 0.01
 
-            if path[0][2] < 0.0:
-                path[0][2] = 0.01
+            if path[2] < 0.0:
+                path[2] = 0.01
 
-            if path[0][0] > 0.0 and path[0][0] < self.grid_extent[0] and path[0][1] > 0.0 and path[0][1] < \
-                    self.grid_extent[1] and path[0][2] > 0.0 and path[0][2] < self.grid_extent[2]:
-                if path[1][0] > 0.0 and path[1][0] < self.grid_extent[0] and path[1][1] > 0.0 and path[1][1] < \
-                        self.grid_extent[1] and path[1][2] > 0.0 and path[1][2] < self.grid_extent[2]:
-                    xx = np.floor(path[0][0] * self.grid_size[0] / self.grid_extent[0])
-                    yy = np.floor(path[0][1] * self.grid_size[1] / self.grid_extent[1])
-                    zz = np.floor(path[0][2] * self.grid_size[2] / self.grid_extent[2])
-                    gn = xx * self.grid_size[1] * self.grid_size[2] + yy * self.grid_size[2] + zz
-                    c_inner = gn.astype(int)
+            if path[0] > 0.0 and path[0] < self.grid_extent[0]:
+                if path[1] > 0.0 and path[1] < self.grid_extent[1]:
+                    if path[2] > 0.0 and path[2] < self.grid_extent[2]:
+                        xx = np.floor(path[0] * self.grid_size[0] / self.grid_extent[0])
+                        yy = np.floor(path[1] * self.grid_size[1] / self.grid_extent[1])
+                        zz = np.floor(path[2] * self.grid_size[2] / self.grid_extent[2])
+                        gn = xx * self.grid_size[1] * self.grid_size[2] + yy * self.grid_size[2] + zz
+                        c = gn.astype(int)
+                        avoidance_score = 0.0
 
-                    xx = np.floor(path[1][0] * self.grid_size[0] / self.grid_extent[0])
-                    yy = np.floor(path[1][1] * self.grid_size[1] / self.grid_extent[1])
-                    zz = np.floor(path[1][2] * self.grid_size[2] / self.grid_extent[2])
-                    gn = xx * self.grid_size[1] * self.grid_size[2] + yy * self.grid_size[2] + zz
-                    c_outer = gn.astype(int)
-                    avoidance_score = 300.0
+                        for i, av in enumerate(self.other_vs):
+                            if not i == self.vehicle_no:
+                                avoidance_score -= self.avoidance_coeff ** 2 / (
+                                            (path[0] - av[0]) ** 2 + (path[1] - av[1]) ** 2)
 
-                    for i, av in enumerate(self.other_vs):
-                        if not i == self.vehicle_no:
-                            avoidance_score -= self.avoidance_coeff ** 2 / (
-                                        (path[0][0] - av[0]) ** 2 + (path[0][1] - av[1]) ** 2)
-
-                    values = []
-                    ss = pc[c_inner, c_inner] + pc[c_outer, c_outer]
-                    values.append(pf[c_inner] + pf[c_outer])
-                    lmp.append(pf[c_inner] + pf[c_outer])
-                    lunc.append(pc[c_inner, c_inner] + pc[c_outer, c_outer])
-                    lavoid.append(avoidance_score)
-                    scores.append(ss + pf[c_inner] + pf[c_outer] + avoidance_score)
-                    wps.append([path[0][0], path[0][1], path[0][2]])
+                        values = []
+                        ss = pc[c, c]
+                        values.append(pf[c])
+                        lmp.append(pf[c])
+                        lunc.append(pc[c, c])
+                        lavoid.append(avoidance_score)
+                        scores.append(ss + pf[c] + avoidance_score)
+                        wps.append([path[0], path[1], path[2]])
 
         index = np.argmax(scores)
 

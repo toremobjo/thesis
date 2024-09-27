@@ -1,5 +1,7 @@
 from utils import vehicle, segment, getTempVal, FlatGaussianRandomField
 import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 gridsize = 50
@@ -55,4 +57,4 @@ fig.colorbar(bbb,ax=ax[1,0])
 fig.colorbar(ccc,ax=ax[0,1])
 fig.colorbar(ddd,ax=ax[1,1])
 plt.savefig("fig/example0/field.png",dpi=300)
-plt.show()
+
