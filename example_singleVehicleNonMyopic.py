@@ -1,11 +1,11 @@
-import matplotlib.pyplot as plt
+
 import numpy as np
 import pandas as pd
-import copy
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
-import SpatialLogGP
 from AUVNM import AUV
 from simulator_cf import getValue
 
@@ -140,8 +140,7 @@ fig = go.Figure(data=[go.Volume(
 fig.show()
 fig.write_image("fig/NMsinglevehicleExample/variance.png")
 
-
-ss = np.array(auvs[0].scorel)
+ss = np.array(auvs[0].scorel,dtype=object)
 plt.plot(ss.T[4],ss.T[0],label = "Total")
 plt.plot(ss.T[4],ss.T[1],label = "predictive mean")
 plt.plot(ss.T[4],ss.T[2],label = "unc")
@@ -152,7 +151,7 @@ plt.close()
 
 
 for ii in range(nv):
-    ss = np.array(auvs[ii].scorel)
+    ss = np.array(auvs[ii].scorel,dtype=object)
 
     rmse = []
     times = []
@@ -165,8 +164,7 @@ for ii in range(nv):
         times.append(log[4])
 
     plt.plot(times,rmse)
-    with open('log2.npy', 'wb') as f:
-        np.save(f, ss)
+
 grid = np.array(grid)
 plt.savefig("fig/NMsinglevehicleExample/rmse.png",dpi = 300)
 plt.close()

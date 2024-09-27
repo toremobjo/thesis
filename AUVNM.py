@@ -269,8 +269,7 @@ class AUV:
 
         # Log scores, predictive mean, uncertainty, avoidance score, update time, predicted field, and uncertainties
         self.scorel.append(
-            [scores[index], lmp[index], lunc[index], lavoid[index], self.update_iteration * self.update_period, pf,
-             np.diag(pc)])
+            [scores[index], lmp[index], lunc[index], lavoid[index], self.update_iteration * self.update_period, pf, np.diag(pc)])
         wp = wps[index]
         return wp
 

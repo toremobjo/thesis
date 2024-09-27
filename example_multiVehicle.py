@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import copy
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
@@ -139,7 +140,7 @@ fig.show()
 fig.write_image("fig/multivehicleExample/variance.png")
 
 
-ss = np.array(auvs[0].scorel)
+ss = np.array(auvs[0].scorel,dtype=object)
 plt.plot(ss.T[4],ss.T[0],label = "Total")
 plt.plot(ss.T[4],ss.T[1],label = "predictive mean")
 plt.plot(ss.T[4],ss.T[2],label = "unc")
@@ -150,7 +151,7 @@ plt.close()
 
 
 for ii in range(nv):
-    ss = np.array(auvs[ii].scorel)
+    ss = np.array(auvs[ii].scorel,dtype=object)
 
     rmse = []
     times = []
